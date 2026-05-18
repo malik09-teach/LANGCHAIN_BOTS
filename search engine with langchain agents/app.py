@@ -38,7 +38,7 @@ from langchain_community.tools import (
 # ================================
 # initialize_agent creates AI agents
 # AgentType defines reasoning behavior
-from langchain.agents import initialize_agent, AgentType
+from langchain_classic.agents import initialize_agent, AgentType
 
 
 # ================================
