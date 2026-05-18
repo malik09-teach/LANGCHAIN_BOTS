@@ -1,420 +1,204 @@
 # ================================
 # IMPORT STREAMLIT
 # ================================
-# Streamlit is used for building the web UI
 import streamlit as st
-
 
 # ================================
 # IMPORT GROQ LLM
 # ================================
-# ChatGroq connects LangChain with Groq models
 from langchain_groq import ChatGroq
 
+# ================================
+# IMPORT SEARCH API WRAPPERS & TOOLS
+# ================================
+from langchain_community.utilities import ArxivAPIWrapper, WikipediaAPIWrapper
+from langchain_community.tools import ArxivQueryRun, WikipediaQueryRun, DuckDuckGoSearchRun
 
 # ================================
-# IMPORT SEARCH API WRAPPERS
+# IMPORT MODERN AGENT SYSTEM
 # ================================
-# These wrappers connect to external APIs
-from langchain_community.utilities import (
-    ArxivAPIWrapper,
-    WikipediaAPIWrapper
-)
-
-
-# ================================
-# IMPORT TOOLS
-# ================================
-# These are callable tools used by the AI agent
-from langchain_community.tools import (
-    ArxivQueryRun,
-    WikipediaQueryRun,
-    DuckDuckGoSearchRun
-)
-
-
-# ================================
-# IMPORT AGENT SYSTEM
-# ================================
-# initialize_agent creates AI agents
-# AgentType defines reasoning behavior
-from langchain_classic.agents import initialize_agent, AgentType
-
+from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 # ================================
 # IMPORT STREAMLIT CALLBACK
 # ================================
-# Shows live agent thinking process
-from langchain.callbacks import StreamlitCallbackHandler
-
+from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 
 # ================================
-# IMPORT PDF LOADER
+# IMPORT PDF LOADER & TEXT SPLITTER
 # ================================
-# Reads PDF documents
 from langchain_community.document_loaders import PyPDFLoader
-
-
-# ================================
-# IMPORT TEXT SPLITTER
-# ================================
-# Splits large text into chunks
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
 # ================================
-# IMPORT EMBEDDINGS
+# IMPORT EMBEDDINGS & VECTOR DB
 # ================================
-# Converts text into vector embeddings
 from langchain_huggingface import HuggingFaceEmbeddings
-
-
-# ================================
-# IMPORT CHROMA VECTOR DATABASE
-# ================================
-# Stores vector embeddings
 from langchain_chroma import Chroma
 
+# ================================
+# IMPORT MODERN RAG CHAIN
+# ================================
+from langchain_classic.chains import create_retrieval_chain
+from langchain_classic.chains.combine_documents.stuff import create_stuff_documents_chain
 
 # ================================
-# IMPORT RAG CHAIN
+# IMPORT OS & DOTENV
 # ================================
-# RetrievalQA is used for PDF question answering
-from langchain.chains import RetrievalQA
-
-
-# ================================
-# IMPORT OS
-# ================================
-# Used for environment variables
 import os
-
-
-# ================================
-# IMPORT DOTENV
-# ================================
-# Loads API keys from .env file
 from dotenv import load_dotenv
 
-
 # ================================
-# LOAD .ENV FILE
+# LOAD ENV VARIABLES
 # ================================
-# Loads all environment variables
 load_dotenv()
-
-
-# ================================
-# LOAD HUGGINGFACE TOKEN
-# ================================
-# Needed for embeddings model
-os.environ["HF_TOKEN"] = os.getenv("HF_TOKEN")
-
+os.environ["HUGGING_FACE_API"] = os.getenv("HUGGING_FACE_API")
 
 # ================================
 # CREATE EMBEDDING MODEL
 # ================================
-# Converts text into vectors
-embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"
-)
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
 # ==========================================================
 # STREAMLIT UI
 # ==========================================================
-
-# App title
-st.title("🔎 AI Search + PDF RAG Chatbot")
-
-
-# App description
-st.write(
-    "Upload PDFs or search the web using AI tools."
-)
-
+st.title("AI Search & PDF RAG Chatbot")
+st.write("Upload PDFs or search the web using AI tools.")
 
 # ==========================================================
 # SIDEBAR SETTINGS
 # ==========================================================
-
-# Sidebar title
 st.sidebar.title("Settings")
-
-
-# Input field for Groq API Key
-api_key = st.sidebar.text_input(
-    "Enter your Groq API Key:",
-    type="password"
-)
-
+api_key = st.sidebar.text_input("Enter your Groq API Key:", type="password")
 
 # ==========================================================
 # CREATE SEARCH TOOLS
 # ==========================================================
+arxiv_wrapper = ArxivAPIWrapper(top_k_results=1, doc_content_chars_max=300)
+arxiv = ArxivQueryRun(api_wrapper=arxiv_wrapper)
 
-# Arxiv wrapper for research papers
-arxiv_wrapper = ArxivAPIWrapper(
-    top_k_results=1,
-    doc_content_chars_max=300
-)
+wiki_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=300)
+wiki = WikipediaQueryRun(api_wrapper=wiki_wrapper)
 
-
-# Create Arxiv tool
-arxiv = ArxivQueryRun(
-    api_wrapper=arxiv_wrapper
-)
-
-
-# Wikipedia wrapper
-wiki_wrapper = WikipediaAPIWrapper(
-    top_k_results=1,
-    doc_content_chars_max=300
-)
-
-
-# Create Wikipedia tool
-wiki = WikipediaQueryRun(
-    api_wrapper=wiki_wrapper
-)
-
-
-# DuckDuckGo internet search tool
-search = DuckDuckGoSearchRun(
-    name="Search"
-)
-
+search = DuckDuckGoSearchRun(name="Search")
 
 # ==========================================================
 # MULTIPLE PDF FILE UPLOADER
 # ==========================================================
-
-# Users can upload multiple PDFs
-uploaded_files = st.file_uploader(
-    "Upload PDF Files",
-    type="pdf",
-    accept_multiple_files=True
-)
-
+uploaded_files = st.file_uploader("Upload PDF Files", type="pdf", accept_multiple_files=True)
 
 # ==========================================================
 # CREATE CHAT MEMORY
 # ==========================================================
-
-# Checks whether messages exist in memory
 if "messages" not in st.session_state:
-
-    # Initial assistant message
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": (
-                "Hi! I can search the web "
-                "and answer questions from PDFs."
-            )
+            "content": "Hi! I can search the web and answer questions from PDFs."
         }
     ]
 
-
-# ==========================================================
-# DISPLAY OLD CHAT HISTORY
-# ==========================================================
-
-# Loop through previous messages
 for msg in st.session_state.messages:
-
-    # Display each message
-    st.chat_message(msg["role"]).write(
-        msg["content"]
-    )
-
+    st.chat_message(msg["role"]).write(msg["content"])
 
 # ==========================================================
 # PDF PROCESSING
 # ==========================================================
-
-# Empty list for storing documents
 documents = []
+retriever = None # Initialize retriever as None
 
-
-# Check whether user uploaded PDFs
 if uploaded_files:
-
-    # Loop through uploaded PDFs
     for uploaded_file in uploaded_files:
-
-        # Create temporary PDF file
         with open("temp.pdf", "wb") as f:
-
-            # Write uploaded PDF content
             f.write(uploaded_file.getvalue())
 
-
-        # Load PDF file
         loader = PyPDFLoader("temp.pdf")
-
-
-        # Extract PDF pages
         docs = loader.load()
-
-
-        # Add pages into documents list
         documents.extend(docs)
 
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(documents)
 
-    # ======================================================
-    # TEXT SPLITTING
-    # ======================================================
-
-    # Split large text into chunks
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
-    )
-
-
-    # Create document chunks
-    splits = text_splitter.split_documents(
-        documents
-    )
-
-
-    # ======================================================
-    # CREATE VECTOR DATABASE
-    # ======================================================
-
-    # Store chunks as embeddings
-    vectorstore = Chroma.from_documents(
-        documents=splits,
-        embedding=embeddings
-    )
-
-
-    # Create retriever
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     retriever = vectorstore.as_retriever()
 
-
 # ==========================================================
-# USER INPUT
+# USER INPUT & LLM LOGIC
 # ==========================================================
+if user_query := st.chat_input("Ask anything..."):
+    
+    # Check for API key before proceeding
+    if not api_key:
+        st.warning("Please enter your Groq API Key in the sidebar.")
+        st.stop()
 
-# Chat input box
-if prompt := st.chat_input(
-    "Ask anything..."
-):
-
-    # ======================================================
-    # SAVE USER MESSAGE
-    # ======================================================
-
-    # Store user message in memory
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
-
-
-    # Display user message
-    st.chat_message("user").write(prompt)
-
-
-    # ======================================================
-    # CREATE GROQ LLM
-    # ======================================================
+    # Save and display user message
+    st.session_state.messages.append({"role": "user", "content": user_query})
+    st.chat_message("user").write(user_query)
 
     # Create Groq language model
     llm = ChatGroq(
         groq_api_key=api_key,
-        model_name="Llama3-8b-8192",
+        model_name="llama3-8b-8192",
         streaming=True
     )
 
-
-    # ======================================================
-    # CREATE TOOLS LIST
-    # ======================================================
-
-    # List of tools available to the AI agent
-    tools = [search, arxiv, wiki]
-
-
-    # ======================================================
-    # CREATE AI AGENT
-    # ======================================================
-
-    # AI agent capable of reasoning and tool calling
-    search_agent = initialize_agent(
-        tools=tools,
-        llm=llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        handling_parsing_errors=True
-    )
-
-
-    # ======================================================
-    # ASSISTANT RESPONSE AREA
-    # ======================================================
-
     with st.chat_message("assistant"):
-
-        # ==================================================
-        # LIVE CALLBACK HANDLER
-        # ==================================================
-
-        # Shows live reasoning steps
-        st_cb = StreamlitCallbackHandler(
-            st.container(),
-            expand_new_thoughts=False
-        )
-
+        st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+        final_answer = ""
 
         # ==================================================
         # HYBRID LOGIC
         # ==================================================
-
-        # If PDFs exist → use RAG
-        if uploaded_files:
-
-            # Create Retrieval QA Chain
-            qa_chain = RetrievalQA.from_chain_type(
-                llm=llm,
-                retriever=retriever
+        # If PDFs exist → use Modern RAG
+        if uploaded_files and retriever:
+            
+            # 1. Create a prompt for the QA system
+            system_prompt = (
+                "You are an assistant for question-answering tasks. "
+                "Use the following pieces of retrieved context to answer "
+                "the question. If you don't know the answer, say that you "
+                "don't know. Use three sentences maximum and keep the "
+                "answer concise.\n\n"
+                "{context}"
             )
+            qa_prompt = ChatPromptTemplate.from_messages([
+                ("system", system_prompt),
+                ("human", "{input}"),
+            ])
+            
+            # 2. Build the retrieval chain
+            question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+            qa_chain = create_retrieval_chain(retriever, question_answer_chain)
+            
+            # 3. Invoke the chain
+            response_dict = qa_chain.invoke({"input": user_query})
+            final_answer = response_dict["answer"]
 
-
-            # Search PDFs and answer
-            response = qa_chain.run(prompt)
-
-
-        # Otherwise use web search agent
+        # Otherwise use Modern Web Search Agent
         else:
-
-            # Agent searches web/tools
-            response = search_agent.run(
-                st.session_state.messages,
-                callbacks=[st_cb]
+            tools = [search, arxiv, wiki]
+            
+            # 1. Create an agent prompt template
+            agent_prompt = ChatPromptTemplate.from_messages([
+                ("system", "You are a helpful research assistant. Use the provided tools to answer the user's questions."),
+                ("human", "{input}"),
+                MessagesPlaceholder("agent_scratchpad"),
+            ])
+            
+            # 2. Build the tool calling agent and executor
+            agent = create_tool_calling_agent(llm, tools, agent_prompt)
+            search_agent = AgentExecutor(agent=agent, tools=tools, handle_parsing_errors=True)
+            
+            # 3. Invoke the agent
+            response_dict = search_agent.invoke(
+                {"input": user_query},
+                config={"callbacks": [st_cb]}
             )
+            final_answer = response_dict["output"]
 
-
-        # ==================================================
-        # SAVE ASSISTANT RESPONSE
-        # ==================================================
-
-        # Store assistant response
-        st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": response
-            }
-        )
-
-
-        # ==================================================
-        # DISPLAY FINAL RESPONSE
-        # ==================================================
-
-        # Show final answer
-        st.write(response)
-
+        # Display and save final response
+        st.write(final_answer)
+        st.session_state.messages.append({"role": "assistant", "content": final_answer})
