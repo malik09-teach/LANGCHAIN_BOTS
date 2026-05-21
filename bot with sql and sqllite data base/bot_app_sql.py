@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from dotenv import load_dotenv 
 from pathlib import Path 
-
+import pandas as pd
 # Modern LangChain Imports
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit, create_sql_agent
