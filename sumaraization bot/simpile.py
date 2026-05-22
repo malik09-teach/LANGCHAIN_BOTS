@@ -3,7 +3,7 @@ import tiktoken
 from langchain_groq import ChatGroq
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from langchain.chains.summarize import load_summarize_chain
+from langchain_classic.chains.summarize import load_summarize_chain
 from langchain_core.prompts import PromptTemplate
 from langchain_community.document_loaders import YoutubeLoader, WebBaseLoader
 
@@ -16,9 +16,9 @@ def process_text(text: str) -> list[Document]:
     splitter = RecursiveCharacterTextSplitter(chunk_size=6000, chunk_overlap=400)
     chunks = splitter.split_text(text)
     return [Document(page_content=chunk) for chunk in chunks]
-
 def fetch_youtube_transcript(url: str) -> str:
-    loader = YoutubeLoader.from_youtube_url(url, add_video_info=True)
+    # Set add_video_info to False to bypass the Bad Request error
+    loader = YoutubeLoader.from_youtube_url(url, add_video_info=False) 
     docs = loader.load()
     return " ".join([d.page_content for d in docs])
 
@@ -32,7 +32,7 @@ def execute_fast_summary(api_key: str, text: str, detail_level: str):
     """Routes text based on length and uses a dual-model architecture for speed."""
     
     # Model 1: Fast 8B model for mapping (heavy lifting)
-    fast_llm = ChatGroq(temperature=0, model_name="llama-3.1-8b-instant", groq_api_key=api_key)
+    fast_llm =ChatGroq(temperature=0, model_name="gemma2-9b-it", groq_api_key=api_key)
     
     # Model 2: Smart 70B model for reducing (final polishing)
     smart_llm = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile", groq_api_key=api_key)
