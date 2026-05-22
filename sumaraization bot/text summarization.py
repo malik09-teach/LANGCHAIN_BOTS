@@ -37,10 +37,10 @@ def initialize_agent(api_key: str):
         tokens = get_token_count(text)
         
         # We use st.info to show the backend routing decision in the UI
-        st.info(f"📊 **Token Count:** {tokens}")
+        st.info(f" **Token Count:** {tokens}")
 
         if tokens <= TOKEN_LIMIT:
-            st.success("⚡ **Strategy Selected:** `Stuff` (Context under limit)")
+            st.success(" **Strategy Selected:** `Stuff` (Context under limit)")
             docs = [Document(page_content=text)]
             chain = load_summarize_chain(llm, chain_type="stuff")
             return chain.invoke(docs)["output_text"]
@@ -48,10 +48,10 @@ def initialize_agent(api_key: str):
         docs = process_text(text)
 
         if preference == "detailed":
-            st.warning("🔍 **Strategy Selected:** `Refine` (Long text + High Detail)")
+            st.warning(" **Strategy Selected:** `Refine` (Long text + High Detail)")
             chain = load_summarize_chain(llm, chain_type="refine")
         else:
-            st.warning("🚀 **Strategy Selected:** `Map-Reduce` (Long text + Fast)")
+            st.warning(" **Strategy Selected:** `Map-Reduce` (Long text + Fast)")
             chain = load_summarize_chain(llm, chain_type="map_reduce")
 
         return chain.invoke(docs)["output_text"]
@@ -69,7 +69,7 @@ def initialize_agent(api_key: str):
 
 # --- 3. Streamlit UI ---
 st.set_page_config(page_title="Dynamic Agentic Summarizer", layout="wide")
-st.title("Dynamic Summarization Agent 🤖")
+st.title("Dynamic Summarization Agent ")
 st.markdown("This agent automatically routes your text to `Stuff`, `Map-Reduce`, or `Refine` based on exact token counts and your preferred detail level.")
 
 # Sidebar for configuration
