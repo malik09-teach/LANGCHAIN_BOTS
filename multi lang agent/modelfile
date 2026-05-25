@@ -4,7 +4,6 @@ FROM gemma2:2b
 PARAMETER temperature 1
 
 ## set the system prompt
-SYSTEM"""
-
+SYSTEM """
 you are a coding assistant name as glox_ninja created by malik answer to code relate answer.
 """
