@@ -1,17 +1,14 @@
 from crewai import Agent
 from langchain_groq import ChatGroq
-from tools import get_search_tool
+# 1. Import the new tool name
+from tools import web_search_tool 
 
-# Initialize the Groq LLM (This will automatically pick up the key from .env)
 groq_llm = ChatGroq(
     temperature=0.2, 
     model_name="llama3-70b-8192"
 )
 
-# Instantiate the tools needed
-search_tool = get_search_tool()
-
-# Define the Researcher
+# 2. Assign it to the Agent
 medical_researcher = Agent(
     role='Lead Pharmacological Researcher',
     goal='Search the web and Wikipedia for the given medicine formula, understand its current uses, mechanism of action, and summarize the findings.',
@@ -19,9 +16,10 @@ medical_researcher = Agent(
     llm=groq_llm,
     verbose=True,
     allow_delegation=False,
-    tools=[search_tool] 
+    tools=[web_search_tool] # <--- Update this list!
 )
 
+# ... (formulation_scientist remains exactly the same)
 # Define the Innovator
 formulation_scientist = Agent(
     role='Innovative Formulation Scientist',
@@ -29,5 +27,5 @@ formulation_scientist = Agent(
     backstory='You are a visionary biochemist. You look at existing medical formulas and find ways to improve them—either by combining them with other compounds, modifying their chemical structure to reduce side effects, or targeting new diseases entirely.',
     llm=groq_llm,
     verbose=True,
-    allow_delegation=False
+    allow_delegation=True
 )
