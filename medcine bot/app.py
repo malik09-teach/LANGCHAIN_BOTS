@@ -22,7 +22,7 @@ os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 # ==========================================
 # 2. UI CONFIGURATION & SIDEBAR
 # ==========================================
-st.set_page_config(page_title="AI Drug Discovery Pipeline", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="AI Drug Discovery Pipeline", page_icon="", layout="wide")
 
 st.title(" AI Drug Discovery & Formulation Pipeline")
 st.markdown("Enter a chemical formula to trigger the Agentic AI workflow. The Researcher will scour the web, and the Innovator will propose a new formulation.")
