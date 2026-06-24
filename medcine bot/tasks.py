@@ -1,16 +1,26 @@
 from crewai import Task
 from agents import medical_researcher, formulation_scientist
 
-def create_research_task():
+def create_research_task(formula: str):
     return Task(
-        description='Search the web for the medical formula/drug: {medicine_formula}. Identify its standard name, its primary uses, side effects, and the diseases it currently cures. Provide a comprehensive summary.',
+        description=f'Search Wikipedia for the medical formula or compound string: {formula}. Identify its standard name, primary uses, side effects, and targeted illnesses.',
         expected_output='A detailed summary including the drug name, chemical formula, mechanism of action, treated diseases, and common side effects.',
         agent=medical_researcher
     )
 
 def create_innovation_task():
     return Task(
-        description='Analyze the pharmacological summary provided by the Researcher. Based on its mechanism of action and limitations, propose a NEW, theoretical chemical composition, modification, or drug combination. Explain how this new formulation works and what specific diseases it could theoretically cure more effectively.',
-        expected_output='A scientific proposal for a new drug formulation, detailing the new composition, its theoretical mechanism of action, and the specific diseases it targets.',
+        description=(
+            'Analyze the pharmacological summary provided by the Researcher. Your goal is to engineer a next-generation breakthrough:\n'
+            '1. COMPOUND SUITABILITY: Assess why the current compound is or is not perfectly suitable for its targets.\n'
+            '2. NEW FORMULA DISCOVERY: Predict and propose a specific new, theoretical chemical formula or structural modification (e.g., adding a functional group, creating a hybrid compound).\n'
+            '3. DISEASE REQUIREMENTS: Explicitly list the specific target diseases this newly discovered formula would be required to treat, explaining why the modification makes it more effective.'
+        ),
+        expected_output=(
+            'A comprehensive Scientific Discovery Report divided into three clear sections: '
+            '### 1. Compound Suitability Evaluation, '
+            '### 2. New Discovered Formula & Structure, and '
+            '### 3. Target Disease Requirements & Therapeutic Mechanism.'
+        ),
         agent=formulation_scientist
     )

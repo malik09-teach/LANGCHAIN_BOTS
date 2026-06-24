@@ -5,20 +5,16 @@ from typing import Type
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 
-# 1. Define the strict schema for validation
 class WikipediaSearchInput(BaseModel):
-    """Input schema for the Wikipedia search tool."""
-    query: str = Field(..., description="The medicine formula or drug name to search on Wikipedia.")
+    query: str = Field(..., description="The medicine formula or chemical compound name to search on Wikipedia.")
 
-# 2. Define the custom Wikipedia Tool
 class WikipediaSearchTool(BaseTool):
     name: str = "Wikipedia Search Tool"
-    description: str = "Searches Wikipedia directly for authoritative data on chemical formulas, drugs, and pharmacology."
+    description: str = "Searches Wikipedia directly for authoritative data on chemical formulas, compounds, drugs, and pharmacology."
     args_schema: Type[BaseModel] = WikipediaSearchInput
 
     def _run(self, query: str) -> str:
         try:
-            # Step 1: Query the Wikipedia Search API to find the most relevant article title
             encoded_query = urllib.parse.quote(query)
             search_url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={encoded_query}&format=json"
             
@@ -28,12 +24,9 @@ class WikipediaSearchTool(BaseTool):
             
             results = search_data.get("query", {}).get("search", [])
             if not results:
-                return f"No Wikipedia pages found matching the formula or term: '{query}'."
+                return f"No Wikipedia pages found matching: '{query}'."
             
-            # Pick the top search result
             best_title = results[0]["title"]
-            
-            # Step 2: Query the Wikipedia Content API to fetch the introduction summary text
             encoded_title = urllib.parse.quote(best_title)
             content_url = f"https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles={encoded_title}&format=json"
             
@@ -44,9 +37,10 @@ class WikipediaSearchTool(BaseTool):
             pages = content_data.get("query", {}).get("pages", {})
             for page_id, page_content in pages.items():
                 if "extract" in page_content and page_content["extract"].strip():
-                    return f"Source Article: Wikipedia - {best_title}\n\n{page_content['extract']}"
+                    # Truncate to 1500 chars to protect your 70K TPM limit
+                    return f"Source Article: Wikipedia - {best_title}\n\n{page_content['extract'][:1500]}..."
             
-            return f"Found a Wikipedia page titled '{best_title}', but could not extract a clean summary introduction."
+            return f"Found Wikipedia page '{best_title}', but could not extract a clean summary."
             
         except Exception as e:
-            return f"An error occurred while connecting directly to Wikipedia: {str(e)}"
+            return f"An error occurred: {str(e)}"
