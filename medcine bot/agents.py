@@ -34,3 +34,14 @@ formulation_scientist = Agent(
     max_iter=3, 
     allow_delegation=False
 )
+
+stability_tester = Agent(
+    role='Chemical Stability & Pharmacokinetics Analyst',
+    goal='Critically evaluate the thermodynamic stability, shelf-life, and physiological survivability of the proposed compound.',
+    backstory='You are a rigorous physical chemist and pharmacokinetic expert. You analyze molecular bonds to predict how a drug will survive in different environments, including the human digestive tract, blood plasma, and long-term shelf storage. You are highly critical of fragile molecular structures.',
+    llm=compound_llm,
+    verbose=True,
+    allow_delegation=False,
+    respect_context_window=True,
+    max_iter=3
+)

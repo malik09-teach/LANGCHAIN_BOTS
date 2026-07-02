@@ -1,5 +1,5 @@
 from crewai import Task
-from agents import medical_researcher, formulation_scientist
+from agents import medical_researcher, formulation_scientist, stability_tester
 
 def create_research_task(formula: str):
     return Task(
@@ -23,4 +23,11 @@ def create_innovation_task():
             '### 3. Target Disease Requirements & Therapeutic Mechanism.'
         ),
         agent=formulation_scientist
+    )
+
+def create_stability_task():
+    return Task(
+        description='Analyze the newly discovered formula provided by the Formulation Scientist. Stress-test this theoretical compound for: 1. THERMODYNAMIC STABILITY (shelf-life, environmental vulnerabilities). 2. PHYSIOLOGICAL SURVIVABILITY (first-pass metabolism, stomach acid pH ~1.5). 3. DELIVERY REQUIREMENTS (specific delivery mechanisms needed to keep the molecule intact).',
+        expected_output='A Pharmacokinetic & Stability Report containing: ### 1. Degradation Vulnerabilities, ### 2. Physiological Survivability Assessment, and ### 3. Required Delivery Mechanisms.',
+        agent=stability_tester
     )
