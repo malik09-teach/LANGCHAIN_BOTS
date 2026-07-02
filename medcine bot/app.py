@@ -17,31 +17,128 @@ os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY", "")
 # ==========================================
 # 2. UI PAGE SETUP
 # ==========================================
-st.set_page_config(page_title="AI Compound Explorer", page_icon="", layout="wide")
+st.set_page_config(page_title="AI Compound Explorer", page_icon="🧬", layout="wide")
 
-st.title(" AI Drug Discovery & Compound Explorer")
-st.markdown("An agentic framework built on top of **Groq Compound Routing Architecture** to research medical elements and safely propose advanced structural optimizations.")
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    
+    html, body, [class*="css"]  {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .stApp {
+        background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+        color: white;
+    }
+    
+    .stButton>button {
+        background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(139, 92, 246, 0.4);
+    }
+    
+    .stTextInput>div>div>input {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+    }
+    
+    .stTextInput>div>div>input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    }
+    
+    .stDownloadButton>button {
+        background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+    
+    [data-testid="stSidebar"] {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    h1 {
+        background: -webkit-linear-gradient(45deg, #3b82f6, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    h2, h3 {
+        color: #e2e8f0 !important;
+        font-weight: 600 !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: rgba(255,255,255,0.05);
+        border-radius: 6px;
+        padding: 10px 20px;
+        color: #94a3b8;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: rgba(139, 92, 246, 0.2) !important;
+        border-bottom: 2px solid #8b5cf6 !important;
+        color: white;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🧬 AI Drug Discovery & Compound Explorer")
+st.markdown("<p style='font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2rem;'>An agentic framework built on top of <b>Groq Compound Routing Architecture</b> to research medical elements and safely propose advanced structural optimizations.</p>", unsafe_allow_html=True)
 
 # ==========================================
 # 3. SIDEBAR SYSTEM DASHBOARD
 # ==========================================
 with st.sidebar:
-    st.header("Engine Infrastructure")
-    st.markdown("**Target Model:** `ChatGroq(model_name='groq/compound')`")
+    st.image("https://cdn-icons-png.flaticon.com/512/3050/3050431.png", width=100)
+    st.markdown("## System Dashboard")
+    st.markdown("---")
+    
+    st.markdown("### ⚙️ Engine Infrastructure")
+    st.info("**Target Model:**\n`ChatGroq(model_name='groq/compound')`")
     
     # Status Indicators
     if os.environ.get("GROQ_API_KEY"):
-        st.success(" Groq Connection: Active")
+        st.success("🟢 Groq Connection: Active")
     else:
-        st.error(" Groq Connection: Disconnected")
+        st.error("🔴 Groq Connection: Disconnected")
         
     if os.environ.get("LANGCHAIN_API_KEY"):
-        st.success(" LangSmith Pipeline: Linked")
+        st.success("🟢 LangSmith Pipeline: Linked")
     else:
-        st.warning(" LangSmith Pipeline: Disabled")
+        st.warning("🟠 LangSmith Pipeline: Disabled")
 
     st.markdown("---")
-    st.markdown("**Plan Guardrails:**\n-  Max Calls: `28 RPM` \n-  Agent Depth: `3 Steps Max` \n-  Document Cutoff: `1500 Chars` active")
+    st.markdown("### 🛡️ Plan Guardrails")
+    st.markdown("- 🚦 Max Calls: `28 RPM` \n- 🧠 Agent Depth: `3 Steps Max` \n- 📄 Document Cutoff: `1500 Chars`")
 
 # ==========================================
 # 4. MAIN INTERACTIVE WORKSPACE
@@ -109,14 +206,14 @@ if st.session_state.pipeline_result is not None:
     ])
     
     with tab1:
-        st.markdown("This phase focuses on understanding the existing properties of the compound, its mechanisms, and known uses.")
+        st.info("💡 **Phase 1** focuses on understanding the existing properties of the compound, its mechanisms, and known uses.")
     with tab2:
-        st.markdown("This phase explores structural modifications to optimize the compound for enhanced efficacy against target diseases.")
+        st.info("🚀 **Phase 2** explores structural modifications to optimize the compound for enhanced efficacy against target diseases.")
     with tab3:
-        st.markdown("This phase rigorously tests the modified compound for thermodynamic stability, physiological survivability, and delivery needs.")
+        st.info("⚖️ **Phase 3** rigorously tests the modified compound for thermodynamic stability, physiological survivability, and delivery needs.")
         
     st.markdown("---")
-    st.markdown("### Generated Output Proposal Data")
+    st.markdown("### 🔬 Generated Output Proposal Data")
     
     st.info(st.session_state.pipeline_result)
     
