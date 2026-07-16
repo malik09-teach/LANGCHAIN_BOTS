@@ -17,7 +17,7 @@ os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY", "")
 # ==========================================
 # 2. UI PAGE SETUP
 # ==========================================
-st.set_page_config(page_title="AI Compound Explorer", page_icon="🧬", layout="wide")
+st.set_page_config(page_title="AI Medical Diagnostician & Drug Discovery", page_icon="🩺", layout="wide")
 
 st.markdown("""
 <style>
@@ -111,8 +111,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🧬 AI Drug Discovery & Compound Explorer")
-st.markdown("<p style='font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2rem;'>An agentic framework built on top of <b>Groq Compound Routing Architecture</b> to research medical elements and safely propose advanced structural optimizations.</p>", unsafe_allow_html=True)
+st.title("🩺 AI Medical Diagnostician & Drug Discovery")
+st.markdown("<p style='font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2rem;'>An agentic framework built on top of <b>Groq</b> to analyze patient symptoms, diagnose potential diseases, recommend treatments, and safely propose advanced structural drug optimizations.</p>", unsafe_allow_html=True)
 
 # ==========================================
 # 3. SIDEBAR SYSTEM DASHBOARD
@@ -200,13 +200,13 @@ if st.session_state.pipeline_result is not None:
     st.success("Pipeline Execution Complete!")
     
     tab1, tab2, tab3 = st.tabs([
-        "🔍 Phase 1: Baseline Research", 
+        "🔍 Phase 1: Diagnosis & Baseline Treatments", 
         "🧬 Phase 2: Structural Innovation", 
         "🛡️ Phase 3: Stability & Delivery"
     ])
     
     with tab1:
-        st.info("💡 **Phase 1** focuses on understanding the existing properties of the compound, its mechanisms, and known uses.")
+        st.info("💡 **Phase 1** focuses on analyzing the provided symptoms, diagnosing potential diseases, and identifying standard baseline treatments.")
     with tab2:
         st.info("🚀 **Phase 2** explores structural modifications to optimize the compound for enhanced efficacy against target diseases.")
     with tab3:
