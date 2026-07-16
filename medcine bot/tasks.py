@@ -1,10 +1,10 @@
 from crewai import Task
 from agents import medical_researcher, formulation_scientist, stability_tester
 
-def create_research_task(formula: str):
+def create_research_task(symptoms: str):
     return Task(
-        description=f'Search Wikipedia for the medical formula or compound string: {formula}. Identify its standard name, primary uses, side effects, and targeted illnesses.',
-        expected_output='A detailed summary including the drug name, chemical formula, mechanism of action, treated diseases, and common side effects.',
+        description=f'Analyze the following symptoms: {symptoms}. Identify potential diseases that match these symptoms and list the standard medical compounds/formulas used to treat them.',
+        expected_output='A detailed summary including potential diseases, their common symptoms, and standard medicinal formulas or compounds used for treatment.',
         agent=medical_researcher
     )
 

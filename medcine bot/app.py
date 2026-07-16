@@ -145,12 +145,12 @@ with st.sidebar:
 # ==========================================
 if "pipeline_result" not in st.session_state:
     st.session_state.pipeline_result = None
-if "current_formula" not in st.session_state:
-    st.session_state.current_formula = ""
+if "current_symptoms" not in st.session_state:
+    st.session_state.current_symptoms = ""
 
-formula_input = st.text_input(
-    "Target Formula / Chemical Compound Input", 
-    placeholder="e.g., C8H9NO2, Metformin, Amoxicillin, Ibuprofen..."
+symptoms_input = st.text_input(
+    "Target Symptoms Input", 
+    placeholder="e.g., chronic cough, shortness of breath, fatigue..."
 )
 
 # Execute button
@@ -161,15 +161,15 @@ if st.button("Execute Groq Compound Pipeline", type="primary"):
         st.error(" Error: GROQ_API_KEY is missing from your .env file.")
         st.stop()
         
-    if not formula_input.strip():
-        st.warning(" Please provide a valid chemical compound formulation string or name.")
+    if not symptoms_input.strip():
+        st.warning(" Please provide a valid set of symptoms.")
         st.stop()
 
     # Spinner locks the UI while the agents do the heavy lifting
     with st.spinner("Initializing Groq Compound routing and deploying agents..."):
         try:
             # 1. Generate tasks dynamically based on user input
-            research_task = create_research_task(formula_input)
+            research_task = create_research_task(symptoms_input)
             innovation_task = create_innovation_task()
             stability_task = create_stability_task()
 
@@ -188,7 +188,7 @@ if st.button("Execute Groq Compound Pipeline", type="primary"):
             
             # Save to session state
             st.session_state.pipeline_result = result
-            st.session_state.current_formula = formula_input
+            st.session_state.current_symptoms = symptoms_input
 
         except Exception as e:
             st.error(f" An error occurred during execution: {str(e)}")
@@ -220,6 +220,6 @@ if st.session_state.pipeline_result is not None:
     st.download_button(
         label="Download Complete Report",
         data=str(st.session_state.pipeline_result),
-        file_name=f"{st.session_state.current_formula}_analysis.txt" if st.session_state.current_formula else "pipeline_report.txt",
+        file_name=f"{st.session_state.current_symptoms}_analysis.txt" if st.session_state.current_symptoms else "pipeline_report.txt",
         mime="text/plain"
     )

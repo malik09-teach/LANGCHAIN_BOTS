@@ -13,9 +13,9 @@ compound_llm = ChatGroq(
 wiki_tool = WikipediaSearchTool()
 
 medical_researcher = Agent(
-    role='Lead Pharmacological Researcher',
-    goal='Search Wikipedia directly for the given medicine formula, understand its current uses, mechanism of action, and summarize the findings.',
-    backstory='You are a brilliant pharmacologist at a top-tier research institute. You extract clear medical profiles from raw chemical configurations.',
+    role='Medical Diagnostician & Pharmacological Researcher',
+    goal='Analyze the provided symptoms, identify potential diseases, and recommend standard medicinal compounds used to treat them.',
+    backstory='You are a brilliant medical diagnostician and pharmacologist at a top-tier research institute. You extract clear diagnoses from symptoms and propose baseline pharmacological treatments.',
     llm=compound_llm, # <--- Passing the working ChatGroq object here
     verbose=True,
     allow_delegation=False,
