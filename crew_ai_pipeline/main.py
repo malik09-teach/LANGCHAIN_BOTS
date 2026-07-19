@@ -12,10 +12,10 @@ def main():
     
     print(f"Targeting URL: {target_url}")
 
-    # Note: Ensure you have your OPENAI_API_KEY set in your environment variables, 
+    # Note: Ensure you have your GROQ_API_KEY set in your environment variables, 
     # or configure your LLM as needed for CrewAI.
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("Warning: OPENAI_API_KEY environment variable is not set.")
+    if not os.environ.get("GROQ_API_KEY"):
+        print("Warning: GROQ_API_KEY environment variable is not set.")
         print("Please set it to run the CrewAI agents successfully.")
 
     # 1. Create Agents
