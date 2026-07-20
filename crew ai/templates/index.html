@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrewAI Agent Dashboard</title>
+    <!-- Use Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Include Marked.js for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="background-mesh"></div>
+    <div class="container">
+        <header>
+            <h1>CrewAI Agent Dashboard</h1>
+            <p>Watch your AI researcher and blogger work in real-time.</p>
+        </header>
+
+        <div class="control-panel">
+            <button id="start-btn" class="glow-on-hover">Start Agent Workflow</button>
+            <div id="status-indicator" class="status idle">Status: Idle</div>
+        </div>
+
+        <div class="main-content">
+            <div class="card terminal-card">
+                <h2>Live Agent Activity</h2>
+                <div class="terminal" id="terminal">
+                    <!-- Logs will appear here -->
+                    <span class="placeholder-text">Waiting for agent to start...</span>
+                </div>
+            </div>
+
+            <div class="card result-card">
+                <h2>Generated Blog Post</h2>
+                <div class="result" id="result">
+                    <!-- Final post will appear here -->
+                    <span class="placeholder-text">Result will be displayed here once complete.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
