@@ -4,7 +4,7 @@ from agents import get_data_engineer, get_model_architect
 from tasks import get_analysis_task, get_modeling_task
 
 # Set up your language model API key
-os.environ["OPENAI_API_KEY"] = "your-openai-api-key-here"
+os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
 def run_ml_agent_pipeline(target_csv):
     # Instantiate the agents
@@ -20,6 +20,7 @@ def run_ml_agent_pipeline(target_csv):
         agents=[data_eng, model_arch],
         tasks=[task1, task2],
         process=Process.sequential,
+        manager_llm="llama-3.3-70b-versatile",
         verbose=True
     )
     
