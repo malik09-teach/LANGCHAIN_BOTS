@@ -1,0 +1,9 @@
+id,neighborhood,square_feet,bedrooms,bathrooms,year_built,garage_type,price
+1,Downtown,1500,3,2,1995,Attached,250000
+2,Suburban,2200,4,2.5,2005,Attached,340000
+3,Downtown,,2,1,1980,None,180000
+4,Rural,1800,3,2,2010,,220000
+5,Suburban,3100,5,3.5,2018,Attached,450000
+6,Downtown,1200,2,1.5,1975,Detached,210000
+7,Rural,2000,3,2,1990,Detached,195000
+8,Suburban,2500,4,2.5,,Attached,380000

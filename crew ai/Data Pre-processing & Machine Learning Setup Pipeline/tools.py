@@ -1,4 +1,4 @@
-from langchain.tools import tool
+from crewai.tools import tool
 import pandas as pd
 
 @tool("CSV Data Loader")
