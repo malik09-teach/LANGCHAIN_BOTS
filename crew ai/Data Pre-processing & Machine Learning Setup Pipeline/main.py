@@ -5,9 +5,14 @@ import argparse
 # Force Python to look in the folder where main.py actually lives
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Import core elements
 from crewai import Crew, Process, LLM
-from agents import get_data_engineer, get_model_architect
+from agent import get_data_engineer, get_model_architect
 from tasks import get_analysis_task, get_modeling_task
 
 # Initialize the Groq LLM object correctly
@@ -17,12 +22,9 @@ groq_llm = LLM(
 )
 
 def run_ml_agent_pipeline(target_csv):
-    # 1. Instantiate the agents and explicitly give them the Groq engine
-    data_eng = get_data_engineer()
-    model_arch = get_model_architect()
-    
-    data_eng.llm = groq_llm
-    model_arch.llm = groq_llm
+    # 1. Instantiate the agents and explicitly give them the Groq engine during instantiation
+    data_eng = get_data_engineer(llm=groq_llm)
+    model_arch = get_model_architect(llm=groq_llm)
     
     # 2. Instantiate tasks sequentially
     task1 = get_analysis_task(data_eng, target_csv)
