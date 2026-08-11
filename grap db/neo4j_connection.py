@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 # ==========================================
 # 1. SETUP AND AUTHENTICATION
@@ -93,3 +95,44 @@ question_2 = "Did Keanu Reeves act in any movies directed by Chad Stahelski?"
 print(f"Question: {question_2}")
 response_2 = chain.invoke({"query": question_2})
 print(f"\nFinal LLM Explanation:\n{response_2['result']}")
+
+# ==========================================
+# 5. GENERATE CYPHER TO INSERT DATA USING LANGCHAIN
+# ==========================================
+print("\n--- Generating Cypher to Insert New Data ---")
+insert_prompt = ChatPromptTemplate.from_template(
+    "You are an expert Neo4j Cypher developer. Given the following natural language description of data, "
+    "generate a single valid Neo4j Cypher query to insert this data into the database using MERGE statements. "
+    "Use 'Movie' and 'Person' node labels. "
+    "Do not include any explanations, markdown formatting, or introductory text. Return ONLY the raw Cypher query.\n\n"
+    "Description: {description}"
+)
+
+# Create a chain to generate the Cypher query
+cypher_generator = insert_prompt | llm | StrOutputParser()
+
+# Natural language description of the data to insert
+data_description = (
+    "A new movie called 'Inception' was released in 2010. It is a Sci-Fi movie. "
+    "Leonardo DiCaprio acted in it as 'Cobb'. Christopher Nolan directed it."
+)
+print(f"Data Description: {data_description}")
+
+# 1. Generate the query with Langchain
+generated_cypher = cypher_generator.invoke({"description": data_description})
+
+# Clean up any potential markdown formatting the LLM might have added
+generated_cypher = generated_cypher.replace("```cypher", "").replace("```", "").strip()
+print(f"\nGenerated Cypher Query:\n{generated_cypher}\n")
+
+# 2. Insert it into Neo4j
+print("Executing generated query to insert data...")
+graph.query(generated_cypher)
+graph.refresh_schema()
+print("✅ New data inserted and schema refreshed!")
+
+# 3. Verify it works with our QA chain
+question_3 = "Who directed Inception and who acted in it?"
+print(f"\nQuestion: {question_3}")
+response_3 = chain.invoke({"query": question_3})
+print(f"\nFinal LLM Explanation:\n{response_3['result']}")
